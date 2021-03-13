@@ -81,6 +81,60 @@ twoway histogram tprofits_b if dummy_b==0, xtitle("Profit (Ksh)") title("Profit 
 /// no se ve nada
 
 ** separated histograms
-histogram tprofits, by(dummy, cols(3),title("Profit distribution -histograms- by treatment"))
+histogram tprofits, by(dummy, cols(3))
+
+
+* 2. ATE replicating table 3
+
+** Wave by wave regressions: 
+**** y_it = \alpha_t + M_i\beta_t + X_i\gamma_t + y_i0\delta_t + X_i\eta_t + e_it
+**** for each t. (They are as independent regressions)
+
+****** t=1
+
+rreg tprofits treat_mentor_b treat_class_b tprofits_b secondaryedu_b lage_b I_emp_b if wave==1
+
+** pooled regressions
+
+**** create variable for fixed effects 
+
+gen w1 = 0
+replace w1 = 1 if wave == 1
+
+gen w2 = 0
+replace w2 = 1 if wave == 2
+
+gen w3 = 0
+replace w3 = 1 if wave == 3
+
+gen w4 = 0
+replace w4 = 1 if wave == 4
+
+gen w5 = 0
+replace w5 = 1 if wave == 5
+
+gen w6 = 0
+replace w6 = 1 if wave == 6
+
+gen w7 = 0
+replace w7 = 1 if wave == 7
+
+**** reg (without t==0)
+
+preserve
+
+//drop extrema 1%
+
+summarize tprofits, detail
+keep if inrange(tprofits, r(p1), r(p99))
+
+rreg tprofits treat_mentor_b treat_class_b secondaryedu_b lage sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b w1 w2 w3 w4 w5 w6 if baseline==0
+
+restore
+
+// NO SE PARECE EN ABSOLUTAMENTE NADA
+
+
+
 
 
