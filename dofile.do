@@ -90,11 +90,52 @@ histogram tprofits, by(dummy, cols(3))
 **** y_it = \alpha_t + M_i\beta_t + X_i\gamma_t + y_i0\delta_t + X_i\eta_t + e_it
 **** for each t. (They are as independent regressions)
 
-****** t=1
+****** t=1 
 
-rreg tprofits treat_mentor_b treat_class_b tprofits_b secondaryedu_b lage_b I_emp_b if wave==1
+reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave == 1
 
-** pooled regressions
+test 1.dummy_b = 2.dummy_b
+
+****** t=2
+
+reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave == 2
+
+test 1.dummy_b = 2.dummy_b
+
+****** t=3 
+
+reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave == 3
+
+test 1.dummy_b = 2.dummy_b
+
+****** t=4 
+
+reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave == 4
+
+test 1.dummy_b = 2.dummy_b
+
+****** t=5 
+
+reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave == 5
+
+test 1.dummy_b = 2.dummy_b
+
+****** t=6 
+
+reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave == 6
+
+test 1.dummy_b = 2.dummy_b
+
+
+****** t=7 
+
+reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave == 7
+
+test 1.dummy_b = 2.dummy_b
+
+
+
+** pooled regression
 
 **** create variable for fixed effects 
 
@@ -119,22 +160,30 @@ replace w6 = 1 if wave == 6
 gen w7 = 0
 replace w7 = 1 if wave == 7
 
-**** reg (without t==0)
+**** reg
+
+replace dummy_b=0 if wave==0 /// at t=0, no treatment for any individual (all control)
+
+/// drop extrema 1%
 
 preserve
 
-//drop extrema 1%
-
 summarize tprofits, detail
-keep if inrange(tprofits, r(p1), r(p99))
-
-rreg tprofits treat_mentor_b treat_class_b secondaryedu_b lage sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b w1 w2 w3 w4 w5 w6 if baseline==0
-
-restore
-
-// NO SE PARECE EN ABSOLUTAMENTE NADA
+drop if tprofits < r(p1) | tprofits > r(p99)
 
 
+**** pooled reg without 1% extrema
 
+reg tprofits i.dummy_b w1 w2 w3 w4 w5 w6 w7 lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b, robust
+
+test 1.dummy_b = 2.dummy_b
+
+restore 
+
+**** pooled reg with all the data
+
+reg tprofits i.dummy_b w1 w2 w3 w4 w5 w6 w7 lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b, robust
+
+test 1.dummy_b = 2.dummy_b
 
 
