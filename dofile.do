@@ -2,11 +2,13 @@
 ** HOMEWORK PROGRAM EVALUATION **
 *********************************
 
-*************** 0. PRELIMINARS. **************************
+*************** 0. PRELIMINARS **************************
 
 clear all
 set more off
 set seed 33000
+
+net install rd, from(http://fmwww.bc.edu/RePEc/bocode/r) replace
 
 cd "/Users/ivanrendobarreiro/Documents/GitHub/hw_program_eval/"
 use "rct_kenya.dta"
@@ -221,5 +223,36 @@ use "rd_mentors.dta"
 *** (i) ce_std
 
 reg treat ce_std, robust 
+
+
+
+
+*********** 8. Estimate Regression Discontinuity on Profits ********************
+
+** (1) RD with bandwiths 100 150 and 200
+
+rd tprofit_endline ce_std, mbw(100 150 200)
+
+** means of treatment and control group (as Table 5)
+
+mean(tprofit_endline) if treat==1
+
+mean(tprofit_endline) if treat==0
+
+
+* (5) Placebo regression
+
+** First we create a fake normalized error around cutoff by trasnlating the variable +0.25
+** 		 as its mean is 0.11 and its std error 0.07 (reasonable traslation)
+**		 this is analogous to traslate -0.25 the cutoff
+
+gen fake_ce_std = ce_std+0.25
+
+rd tprofit_endline fake_ce_std, mbw(100 150 200)
+
+** this makes more sense if we had reg disc???
+
+
+
 
 
