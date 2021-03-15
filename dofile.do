@@ -72,16 +72,18 @@ gen dummy_b= treat_class_b + 2*treat_mentor_b
 
 ** kernel distribution 
 
-twoway kdensity tprofits_b if dummy_b==0, xtitle("Profit (Ksh)") title("Profit distribution -kernel- by treatment") color(blue*.5) lcolor(blue)|| kdensity tprofits_b if dummy_b==1, color(red*.5) lcolor(red) || kdensity tprofits_b, color(green*.5) lcolor(green) legend(order(1 "semi-rural women" 2 "rural women")) legend(order(1 "Control" 2 "Class Treat." 3 "Mentor Treat.") col(1) pos(1) ring(0))
+///twoway kdensity tprofits_b if dummy_b==0, xtitle("Profit (Ksh)") title("Profit distribution -kernel- by treatment") color(blue*.5) lcolor(blue)|| kdensity tprofits_b if dummy_b==1, color(red*.5) lcolor(red) || kdensity tprofits_b, color(green*.5) lcolor(green) legend(order(1 "semi-rural women" 2 "rural women")) legend(order(1 "Control" 2 "Class Treat." 3 "Mentor Treat.") col(1) pos(1) ring(0))
 
 ** histograms
 
-twoway histogram tprofits_b if dummy_b==0, xtitle("Profit (Ksh)") title("Profit distribution -kernel- for each treatment") color(blue%30) lcolor(blue)|| histogram tprofits_b if dummy_b==1, color(red%30) lcolor(red) || histogram tprofits_b, color(green%30) lcolor(green) legend(order(1 "semi-rural women" 2 "rural women")) legend(order(1 "Control" 2 "Class Treat." 3 "Mentor Treat.") col(1) pos(1) ring(0))
+/// twoway histogram tprofits_b if dummy_b==0, xtitle("Profit (Ksh)") title("Profit distribution -kernel- for each treatment") color(blue%30) lcolor(blue)|| histogram tprofits_b if dummy_b==1, color(red%30) lcolor(red) || histogram tprofits_b, color(green%30) lcolor(green) legend(order(1 "semi-rural women" 2 "rural women")) legend(order(1 "Control" 2 "Class Treat." 3 "Mentor Treat.") col(1) pos(1) ring(0))
 
-/// no se ve nada
 
 ** separated histograms
-histogram tprofits, by(dummy, cols(3))
+/// histogram tprofits, by(dummy, cols(3))
+
+** the graph we need
+lgraph tprofits wave, by(dummy_b)
 
 
 * 2. ATE replicating table 3
@@ -92,44 +94,44 @@ histogram tprofits, by(dummy, cols(3))
 
 ****** t=1 
 
-reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave == 1
+reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave == 1, robust
 
 test 1.dummy_b = 2.dummy_b
 
 ****** t=2
 
-reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave == 2
+reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave == 2, robust
 
 test 1.dummy_b = 2.dummy_b
 
 ****** t=3 
 
-reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave == 3
+reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave == 3, robust
 
 test 1.dummy_b = 2.dummy_b
 
 ****** t=4 
 
-reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave == 4
+reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave == 4, robust
 
 test 1.dummy_b = 2.dummy_b
 
 ****** t=5 
 
-reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave == 5
+reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave == 5, robust
 
 test 1.dummy_b = 2.dummy_b
 
 ****** t=6 
 
-reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave == 6
+reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave == 6, robust
 
 test 1.dummy_b = 2.dummy_b
 
 
 ****** t=7 
 
-reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave == 7
+reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave == 7, robust
 
 test 1.dummy_b = 2.dummy_b
 
@@ -185,5 +187,39 @@ restore
 reg tprofits i.dummy_b w1 w2 w3 w4 w5 w6 w7 lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b, robust
 
 test 1.dummy_b = 2.dummy_b
+
+
+
+*********** 6. EFFECT OF TREATMENTS ON "SWITCH SUPPLIER" AND "KEEP" RECORDS **************
+
+** Linear Probability Model for both cases (without controlling)
+
+reg supplierswitch i.dummy_b if wave==5, robust
+
+reg keeps_some_records i.dummy_b if wave==6, robust 
+
+** Linear Probability Model for both cases (with controls)
+
+reg supplierswitch i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave==5, robust
+
+reg keeps_some_records i.dummy_b formalaccount_b lage_b sec0_b sec1_b sec2_b sec3_b sec4_b secondaryedu_b I_emp_b tprofits_b if wave==6, robust 
+
+
+
+
+*******************************************************************************
+*****************  SECOND PART
+*******************************************************************************
+
+clear 
+use "rd_mentors.dta"
+
+*********** 7. BALANCING TEST FOR THE CONTROL VARIABLES ***********************
+
+** We replicate Question 4 regressions here, but changing the variables
+
+*** (i) ce_std
+
+reg treat ce_std, robust 
 
 
