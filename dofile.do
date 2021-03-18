@@ -8,87 +8,88 @@ clear all
 set more off
 set seed 33000
 
+ssc install lgraph // library for plotting profits
 net install rd, from(http://fmwww.bc.edu/RePEc/bocode/r) replace
 
-cd "/Users/ivanrendobarreiro/Documents/GitHub/hw_program_eval/"
+cd "/Users/ivanrendobarreiro/Documents/GitHub/hw_program_eval/" // may be changed
 use "rct_kenya.dta"
 
-*************** 4. BALANCING TEST ************************
+*************** 4.1 BALANCING TEST ************************
 
-* controls to be used: secondary education, age of the owner, and business sector fixed effects (???) , and an indicator for whether the firm employs any workers 
+** controls to be used: secondary education, age of the owner, and business sector fixed effects, and an indicator for whether the firm employs any workers 
 
-* (!) data issue: if i is in control, treatment variable for i is not 0, but . (nan))
+** (!) data issue: if i is in control, treatment variable for i is not 0, but . (nan))
 
 replace treat_class_b = 0 if missing(treat_class_b) // technical issue with nans, then collinearity
 replace treat_mentor_b= 0 if missing(treat_mentor_b) // technical issue with nans, then collinearity
 
 ** different regressions (ttest included)
 
-*** (i) secondary school 
+**** (i) secondary school 
 
 reg secondaryedu_b treat_class_b treat_mentor_b if baseline==1
 
 
-*** (ii) age
+**** (ii) age
 
 reg age_b treat_class_b treat_mentor_b if baseline==1
 
 
-*** (iii) retail sector
+**** (iii) retail sector
 
 reg sec0_b treat_class_b treat_mentor_b if baseline==1
 
 
-*** (iv) manufacturing sector
+**** (iv) manufacturing sector
 
 reg sec1_b treat_class_b treat_mentor_b if baseline==1
 
 
-*** (v) services sector
+**** (v) services sector
 
 reg sec2_b treat_class_b treat_mentor_b if baseline==1
 
 
-*** (vi) food prep sector
+**** (vi) food prep sector
 
 reg sec3_b treat_class_b treat_mentor_b if baseline==1
 
 
-*** (vii) other sector
+**** (vii) other sector
 
 reg sec4_b treat_class_b treat_mentor_b if baseline==1
 
 
-*** (viii) has employees? dummy
+**** (viii) has employees? dummy
 
 reg I_emp_b treat_class_b treat_mentor_b if baseline==1
 
 
 *************** 5. TREATMENT EFFECTS ************************
 
-* 1. Graph the profit distribution 
+* 1. Graph the profit distribution (and other graphs)
 
 ** it is better to have a dummy with 0=control, 1=class, 2=mentor, so we create it
 
-gen dummy_b= treat_class_b + 2*treat_mentor_b
+gen dummy_b= treat_class_b + 2*treat_mentor_b 
 
-** kernel distribution 
+** kernel distribution (not needed)
 
 ///twoway kdensity tprofits_b if dummy_b==0, xtitle("Profit (Ksh)") title("Profit distribution -kernel- by treatment") color(blue*.5) lcolor(blue)|| kdensity tprofits_b if dummy_b==1, color(red*.5) lcolor(red) || kdensity tprofits_b, color(green*.5) lcolor(green) legend(order(1 "semi-rural women" 2 "rural women")) legend(order(1 "Control" 2 "Class Treat." 3 "Mentor Treat.") col(1) pos(1) ring(0))
 
-** histograms
+** histograms (not needed)
 
 /// twoway histogram tprofits_b if dummy_b==0, xtitle("Profit (Ksh)") title("Profit distribution -kernel- for each treatment") color(blue%30) lcolor(blue)|| histogram tprofits_b if dummy_b==1, color(red%30) lcolor(red) || histogram tprofits_b, color(green%30) lcolor(green) legend(order(1 "semi-rural women" 2 "rural women")) legend(order(1 "Control" 2 "Class Treat." 3 "Mentor Treat.") col(1) pos(1) ring(0))
 
 
-** separated histograms
+** separated histograms (not needed)
 /// histogram tprofits, by(dummy, cols(3))
 
-** the graph we need
+** the graph we are asked for
 lgraph tprofits wave, by(dummy_b)
 
 
-* 2. ATE replicating table 3
+* 2. ATE REPLICATING TABLE 3
 
 ** Wave by wave regressions: 
 **** y_it = \alpha_t + M_i\beta_t + X_i\gamma_t + y_i0\delta_t + X_i\eta_t + e_it
@@ -100,11 +101,18 @@ reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b 
 
 test 1.dummy_b = 2.dummy_b
 
+mean(tprofits) if control_b==1 & wave==1 // control mean
+
+
+
 ****** t=2
 
 reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave == 2, robust
 
 test 1.dummy_b = 2.dummy_b
+
+mean(tprofits) if control_b==1 & wave==2 // control mean
+
 
 ****** t=3 
 
@@ -112,11 +120,17 @@ reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b 
 
 test 1.dummy_b = 2.dummy_b
 
+mean(tprofits) if control_b==1 & wave==3 // control mean
+
+
 ****** t=4 
 
 reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave == 4, robust
 
 test 1.dummy_b = 2.dummy_b
+
+mean(tprofits) if control_b==1 & wave==4 // control mean
+
 
 ****** t=5 
 
@@ -124,11 +138,16 @@ reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b 
 
 test 1.dummy_b = 2.dummy_b
 
+mean(tprofits) if control_b==1 & wave==5 // control mean
+
+
 ****** t=6 
 
 reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave == 6, robust
 
 test 1.dummy_b = 2.dummy_b
+
+mean(tprofits) if control_b==1 & wave==6 // control mean
 
 
 ****** t=7 
@@ -136,6 +155,8 @@ test 1.dummy_b = 2.dummy_b
 reg tprofits i.dummy_b lage_b secondaryedu_b sec0_b sec1_b sec2_b sec3_b sec4_b I_emp_b tprofits_b if wave == 7, robust
 
 test 1.dummy_b = 2.dummy_b
+
+mean(tprofits) if control_b==1 & wave==7 // control mean
 
 
 
@@ -190,6 +211,8 @@ reg tprofits i.dummy_b w1 w2 w3 w4 w5 w6 w7 lage_b secondaryedu_b sec0_b sec1_b 
 
 test 1.dummy_b = 2.dummy_b
 
+mean(tprofits) if control_b==1 // control mean
+
 
 
 *********** 6. EFFECT OF TREATMENTS ON "SWITCH SUPPLIER" AND "KEEP" RECORDS **************
@@ -210,7 +233,7 @@ reg keeps_some_records i.dummy_b formalaccount_b lage_b sec0_b sec1_b sec2_b sec
 
 
 *******************************************************************************
-*****************  SECOND PART
+*****************  SECOND PART     ********************************************
 *******************************************************************************
 
 clear 
@@ -220,10 +243,9 @@ use "rd_mentors.dta"
 
 ** We replicate Question 4 regressions here, but changing the variables
 
-*** (i) ce_std
+*** (i) ce_std (the unique)
 
 reg treat ce_std, robust 
-
 
 
 
@@ -250,7 +272,6 @@ gen fake_ce_std = ce_std+0.25
 
 rd tprofit_endline fake_ce_std, mbw(100 150 200)
 
-** this makes more sense if we had reg disc???
 
 
 
